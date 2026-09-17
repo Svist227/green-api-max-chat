@@ -2,7 +2,7 @@ import type {AuthOptions} from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import { getChatId } from '@/utils/getChatId'
 import Credentials from 'next-auth/providers/credentials';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 
 
@@ -97,7 +97,7 @@ async jwt({ token, user }) {
 
     async signIn({ user }) {
     const { doc, getDoc, setDoc } = await import("firebase/firestore")
-    const { firestore } = await import("@/lib/firebase")
+    const { firestore } = await import("@/lib/firebase") 
     const userRef = doc(firestore, "users", user.id)
     const snap = await getDoc(userRef)
 
@@ -107,7 +107,7 @@ async jwt({ token, user }) {
         username: null,
         email: user.email ?? null,
         photoURL: user.image ?? null,
-        createdAt: new Date(),
+        lastLogin: new Date(),
       })
 
       console.log("Создан новый пользователь")
@@ -131,7 +131,7 @@ async jwt({ token, user }) {
                               photoURL: 'favorites.png'
                             }
                           },
-                          updatedAt: "",
+                          updatedAt: serverTimestamp(),
                           lastMessage: "", // передаем сообщение первое если нет чата
                         },
                         { merge: true }

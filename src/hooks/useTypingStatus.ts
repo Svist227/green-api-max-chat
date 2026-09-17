@@ -1,9 +1,9 @@
-import { usesChatStore } from "@/store/StateManagment"
 import { useEffect, useState } from 'react';
 import {set, onValue, ref, getDatabase} from 'firebase/database'
 import { getChatId } from '@/utils/getChatId';
 import { useSession } from "next-auth/react";
 import { setTyping } from "@/services/realtime_db";
+import { usesChatStore } from '@/store/chat-selection.store';
 
 export const useTypingStatus = () => {
     let selectedUser = usesChatStore(state => state.selectedUser)

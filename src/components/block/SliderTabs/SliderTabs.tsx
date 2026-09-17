@@ -1,17 +1,17 @@
-import { useFocusStore } from '@/store/StateManagment'
+import { chatMode, useFocusStore } from '@/store/chat-ui.store'
 import './SliderTabs.scss'
 
 interface SliderTabsProps {
-  mode: string
-  setMode: (mode: string) => void
+  mode: chatMode
+  setMode: (mode: chatMode) => void
 }
 
-const modes = ['chats', 'messages']
+const modes: chatMode[] = ['chats', 'messages']
 
 const SliderTabs = ({ mode, setMode }: SliderTabsProps) => {
     const triggerFocus  = useFocusStore(state => state.toggle);
   
-  const handleSliderClick = (item:string) => {
+  const handleSliderClick = (item:chatMode) => {
     setMode(item);
     triggerFocus()
   }

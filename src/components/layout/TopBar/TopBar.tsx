@@ -1,10 +1,10 @@
 
 import './TopBar.scss'
-import {useChatMode, useChatsOpen, useFocusStore, useSettingsPanelStore} from '@/store/StateManagment';
-import { usesChatStore } from '@/store/StateManagment'
 import formatRelativeDate from '@/utils/formatDate';
 import { useUserStatus } from '@/hooks/useUserStatus';
 import { useTypingStatus } from '@/hooks/useTypingStatus';
+import { useChatMode, useChatsOpen, useFocusStore, useSettingsPanelStore } from '@/store/chat-ui.store';
+import { usesChatStore } from '@/store/chat-selection.store';
 const   TopBar = () => {
    const MenuOpen = useChatsOpen(state => state.toggle)
     const selectedUser = usesChatStore(state => state.selectedUser)

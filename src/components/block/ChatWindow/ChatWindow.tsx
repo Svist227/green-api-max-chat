@@ -1,6 +1,7 @@
 'use client'
+import { useMessageIdStore, usesChatStore } from '@/store/chat-selection.store';
 import './ChatWindow.scss'
-import {useMessageIdStore, useMessageUi, usesChatStore} from '@/store/StateManagment';
+import { useMessageUi } from '@/store/StateManagment';
 
 
 
@@ -34,7 +35,8 @@ const ChatWindow = ({UserParams, mode = 'default'}: ChatWindowProps) => {
     return (
        <div onClick={getId} className="chat-window">
            <div className="chat-window__photo-container" >
-        {UserParams.photo ? (<img src={UserParams.photo} className = 'chat-window__photo'alt="photo" />
+        {UserParams.photo ? (<img src={UserParams.photo}   referrerPolicy="no-referrer"
+ className = 'chat-window__photo'alt="photo" />
 ) : <div className="user-avatar">{UserParams?.username?.charAt(0)}</div>}
 
             

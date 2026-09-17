@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import './SearchBar.scss'
-import { useChatMode, useFocusStore, useValueSearch } from '@/store/StateManagment'
 import { useRef } from 'react';
+import { useChatMode, useFocusStore } from '@/store/chat-ui.store';
+import { useValueSearch } from '@/store/chat-selection.store';
 
 const SearchBar = () => {
     const setMode = useChatMode(state => state.setMode)

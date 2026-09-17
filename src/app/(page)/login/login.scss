@@ -132,7 +132,14 @@ img {
 
 // Main
 .main {
+
 	.wrapper {
+		&-loader{
+		position: absolute;
+		right: 50%;
+			bottom: 50%;
+		
+	}
 		max-width: 28rem;
 		width: 100%;
 		margin: 2rem auto;

@@ -1,10 +1,11 @@
-import { usesChatStore, useSettingsPanelStore } from "@/store/StateManagment";
 import { useState } from "react";
 
 import './SettingsPanel.scss'
 import {IconNotif,IconTheme,IconStorage,IconPrivacy,IconBlock,IconReport,IconLogout,IconChevron,IconClose} from './icons'
 import { signOut } from "next-auth/react";
 import { useUserStatus } from "@/hooks/useUserStatus";
+import { useSettingsPanelStore } from "@/store/chat-ui.store";
+import { usesChatStore } from "@/store/chat-selection.store";
 
 export default function SettingsPanel() {
   const open = useSettingsPanelStore(state => state.isOpen)

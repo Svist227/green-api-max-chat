@@ -1,11 +1,12 @@
 import './MessageInput.scss'
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
-import { useMessageUi, usesChatStore } from '@/store/StateManagment';
+import { useMessageUi,  } from '@/store/StateManagment';
 import { getChatId } from '@/utils/getChatId'
 import { useSession } from 'next-auth/react';
 import { getDatabase, ref,update } from "firebase/database";
 import { SendMessages } from '@/services/sendMessages';
 import { IconAttach, IconEmoji, IconSend } from './icons';
+import { usesChatStore } from '@/store/chat-selection.store';
 
 const MessageInput = () => {
     const [value, setValue] = useState(""); // храниие соообщения из onChange

@@ -2,29 +2,30 @@ import './ChatListContainer.scss'
 import ChatList from '../ChatList/ChatList'
 import ChatSearchResults from '@/components/block/ChatSearchResults/ChatSearchResults'
 import MessageSearchResults from '@/components/block/MessageSearchResults/MessageSearchResults'
-import { useChatsOpen } from '@/store/StateManagment'
-import { useValueSearch } from '@/store/StateManagment'
 import { useGetDataUser } from '@/hooks/getDataUser'
 import { useGetMessagesUser } from '@/hooks/getMessagesUser'
+import { useValueSearch } from '@/store/chat-selection.store'
+import { useChatsOpen } from '@/store/chat-ui.store'
+import Skeleton from '@mui/material/Skeleton';
 
 type Item = {
     searchMode:string
 }
 const ChatListContainer = ({searchMode}:Item) => {
     const isMenuOpen = useChatsOpen(state => state.toggle)
-    const {users, mychats} = useGetDataUser()
     const value = useValueSearch(state => state.currentValue)
-    const messages = useGetMessagesUser()
+    const { data: messages = [] } = useGetMessagesUser()
+    
+    const { data: users = [], isLoading, error, isFetching, isPending, isSuccess } = useGetDataUser()
    
-   
-    // фильтрация по имени 
+ 
+
+        // фильтрация пользователей
         let userFilter = users.filter((user)=> {
             if(!value) return 
             return user.username?.toLowerCase().includes(value.toLowerCase())
         }
         )
-
-        // console.log('Отфильтрованные пользователи', userFilter)
 
     // фильтрация сообщений текущего user-а
          let userMessagegFilter = messages.filter((message) => {
@@ -56,9 +57,14 @@ const ChatListContainer = ({searchMode}:Item) => {
     }
 
     
+
+    
     return(
     <div className="chat__container" onClick={isMenuOpen}>
-    <ChatList/>
+        
+
+        <ChatList/>
+    
     </div>
     )
 }

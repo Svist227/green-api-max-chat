@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import ChatList from '../../block/ChatList/ChatList'
 import SearchBar from '../SearchBar/SearchBar'
-import {useChatsOpen} from '@/store/StateManagment';
 import './Sidebar.scss'
+import { useChatsOpen } from '@/store/chat-ui.store';
 interface ComponentProps {
     fun:boolean,
     children: React.ReactNode;

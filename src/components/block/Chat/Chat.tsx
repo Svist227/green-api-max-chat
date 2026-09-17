@@ -1,5 +1,5 @@
+import { useChatsOpen } from '@/store/chat-ui.store';
 import './Chat.scss'
-import {useChatsOpen} from '@/store/StateManagment';
 import classNames from 'classnames';
 interface ComponentProps {
     children:React.ReactNode

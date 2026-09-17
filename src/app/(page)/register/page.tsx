@@ -1,8 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import '../login/login.scss'
-import Link from 'next/link'	
-import { FormEventHandler, useEffect, useState } from 'react'
+import { FormEventHandler, useState } from 'react'
 
 import { signIn } from "next-auth/react"
 import Form from '@/components/block/Form/Form'
@@ -10,8 +9,10 @@ import Form from '@/components/block/Form/Form'
 export default function Register(){
     const router = useRouter()
 	const [error, setErrror] = useState<string>('')
+	const [loading, setLoading] = useState<boolean>(false)
 	const handleRegister:FormEventHandler<HTMLFormElement> = async (event) => {
 		event.preventDefault()
+		setLoading(true)
 		const formData = new FormData(event.currentTarget) // передали теку-ий элемент ссылку
 		const data = Object.fromEntries(formData.entries())
 		let response = await fetch('/api/register',{
@@ -34,6 +35,7 @@ export default function Register(){
          });  
 
 		 if (res && !res.error){
+		setLoading(false)
           router.push('/')
           return
         } 
@@ -41,13 +43,15 @@ export default function Register(){
 
 		else if (result.message == 'no') {
 			setErrror('Email уже зарегестрирован в системе')
+			setLoading(false)
+
 
 		}
 	}
     return (
 		<>
 
-<Form mode = 'register' onSubmit={handleRegister} errorLog = {error}/>
+<Form mode = 'register' onSubmit={handleRegister} errorLog = {error} loading = {loading}/>
 </>
     )
 

@@ -1,6 +1,6 @@
 
 import realtime from '@/services/realtime_db';
-import { usesChatStore } from '@/store/StateManagment';
+import { usesChatStore } from '@/store/chat-selection.store';
 import {set, onValue, ref, getDatabase} from 'firebase/database'
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';

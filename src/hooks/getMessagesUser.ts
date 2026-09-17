@@ -1,37 +1,25 @@
 import { useEffect, useState } from "react"
 import { getChatId } from "../utils/getChatId"
-import { usesChatStore } from "../store/StateManagment"
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
+import { collection, getDocs, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { firestore} from '@/lib/firebase'
 import { useSession } from "next-auth/react"
 import { RawMessage } from "@/types/message"
 import { RawMessageSchema } from "@/schemas/MessageSchema"
+import { usesChatStore } from "@/store/chat-selection.store"
+import { QueryClient, useQuery } from "@tanstack/react-query"
+
+async function getMessagesHistoryUser( currentUserId: string,selectedUserId: string, signal:AbortSignal): Promise<RawMessage[]>{
+  
 
 
-// получение истории сообщений.
-export const useGetMessagesUser = () => {
-    const selectedUser = usesChatStore(state => state.selectedUser) 
-    const session = useSession()
-    const CurrentUser = session.data?.user
-    const [messages, setMessages] = useState<RawMessage[]>([])
-    
-
-
-// можно настроить чтобы в зависимости от мода эффект возвращаал список всех сообщений или текущего user-а
-
-useEffect(() => {
-    if (!CurrentUser || !selectedUser) return
-
-
-    const chatId = getChatId(CurrentUser.uid, String(selectedUser.uid))
+    const chatId = getChatId(currentUserId, String(selectedUserId))
     
     const q = query(
       collection(firestore, 'chats', chatId, 'messages'),
       orderBy('createdAt')
     )
 
-
-    const unsub = onSnapshot(q, snapshot => {
+        const snapshot = await getDocs(q)
         const resultMessage: RawMessage[] = [];
 
         snapshot.docs.forEach(doc => {
@@ -47,13 +35,45 @@ useEffect(() => {
         })
          
 
-      setMessages(resultMessage)
+      return resultMessage
      
-    })
+    
   
-    return () => unsub()
-  }, [selectedUser, CurrentUser])
 
-
-  return messages
 }
+
+// получение истории сообщений.
+export const useGetMessagesUser = () => {
+   const selectedUser = usesChatStore(state => state.selectedUser) 
+    const session = useSession()
+    const CurrentUser = session.data?.user
+    
+
+
+// можно настроить чтобы в зависимости от мода эффект возвращаал список всех сообщений или текущего user-а
+
+  const query = useQuery({
+      queryKey:[
+        'messages',
+        CurrentUser?.uid,
+        selectedUser?.uid
+      ],
+      queryFn: ({signal}) => getMessagesHistoryUser( CurrentUser!.uid,
+        selectedUser!.uid, 
+      signal),
+        enabled: !!CurrentUser && !!selectedUser,
+        
+
+    })
+
+    console.log(query.data)
+    
+ 
+
+        return query
+    
+
+
+}
+
+

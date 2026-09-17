@@ -1,5 +1,6 @@
-import { useChatMode, usesChatStore, useValueSearch } from '@/store/StateManagment'
+import { useChatMode } from '@/store/chat-ui.store'
 import './ZeroState.scss'
+import { useValueSearch } from '@/store/chat-selection.store'
 
 const ZeroState = () => {
     const mode = useChatMode(state => state.mode)

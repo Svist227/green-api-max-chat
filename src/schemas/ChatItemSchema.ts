@@ -1,9 +1,9 @@
 import * as z from "zod";
-import { MemberInfoSchema } from "./MemberInfoSchema";
+import { OtherUserInfoSchema } from "./OtherUserInfoSchema";
 
 export const ChatItemSchema = z.object({
     chatId: z.string(),
-    otherUser: MemberInfoSchema,
+    otherUser: OtherUserInfoSchema,
     lastMessage: z.string(),
     time: z.union([z.string(), z.null()])
 })

@@ -1,16 +1,16 @@
 import './MessageSearchResults.scss'
 import { Timestamp } from 'firebase/firestore'
 import ChatWindow from '@/components/block/ChatWindow/ChatWindow'
-import { useCurrentUser, usesChatStore } from '@/store/StateManagment'
 import ZeroState from '@/components/block/ZeroState/ZeroState'
 import { useSession } from 'next-auth/react'
+import { usesChatStore } from '@/store/chat-selection.store'
 
 interface Message {
     createdAt:Timestamp
     id:string
     senderId:string
     text:string
-    _localTime:Timestamp
+    
 }
 
 

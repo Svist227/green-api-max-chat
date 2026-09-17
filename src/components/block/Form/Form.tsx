@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import './Form.scss'
+import classNames from 'classnames'
+import CircularProgress from '@mui/material/CircularProgress'
+import Backdrop from '@mui/material/Backdrop'
 
 
 const data = {
@@ -32,16 +35,22 @@ interface dataMode {
   errorLog?: string
   onSubmitGoogle?: () => void
   onSubmit?: React.FormEventHandler<HTMLFormElement>
+  loading: boolean
 }
 
 
-const Form = ({ mode, errorLog, onSubmitGoogle, onSubmit }:dataMode) => {
+const Form = ({ mode, errorLog, onSubmitGoogle, onSubmit, loading }:dataMode) => {
   const { label, question, link, labelButton ,href } = data[mode];
 
+ 
+  
   return (
-     <main className="main">
+     <main className= 'main' >
+      
 	<div className="container">
 		<section className="wrapper">
+      {loading && (    <CircularProgress  className = 'wrapper-loader' aria-label="Loading…" />
+)}
 			<div className="heading">
 				<h1 className="text text-large">{label}</h1>
 				<p className="text text-normal">{question} <span><Link href={href} className="text text-links">{link}</Link></span>
@@ -78,8 +87,14 @@ const Form = ({ mode, errorLog, onSubmitGoogle, onSubmit }:dataMode) => {
 				<div className="input-control">
 					{/* <a href="#" className="text text-links">Forgot Password</a> */}
 					<button type="submit" name="submit" className="input-submit" >
+
             {labelButton}
           </button>
+          <Backdrop
+  sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+  open={loading}
+>
+</Backdrop>
 				</div>
 			</form>
 		    {mode === 'signin' && (

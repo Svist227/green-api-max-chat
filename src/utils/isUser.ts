@@ -14,12 +14,12 @@ export function isUser(data:unknown): data is UserFilter{
         !('email' in data) ||
         !('username' in data) ||
         !('photoURL' in data) ||
-        !('createdAt' in data)
+        !('lastLogin' in data)
       ){
         return false
       }
 
-       return (data.createdAt instanceof Timestamp) 
+       return (data.lastLogin instanceof Timestamp) 
       && (typeof data.uid === 'string')
       && (typeof data.email === 'string')
       && (typeof data.username === 'string') 

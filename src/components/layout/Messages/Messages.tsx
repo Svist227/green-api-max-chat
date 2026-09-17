@@ -1,19 +1,22 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react'
 import Message from '@/components/block/Message/Message'
 import './Messages.scss'
-import { usesChatStore, useMessageIdStore, useMessageUi } from '@/store/StateManagment'
 import MessagesDate from '@/components/block/MessagesDate/MessagesDate'
 import getMessageDate from '@/utils/getMessageDate'
 import { isNewDay } from '@/utils/date'
 import { useSession } from 'next-auth/react'
 import { useMergedMessages } from '@/hooks/useMergedMessages'
 import { useGetMessagesUser } from '@/hooks/getMessagesUser'
+import { useMessageUi } from '@/store/StateManagment'
+import { useMessageIdStore } from '@/store/chat-selection.store'
+import Skeleton from '@mui/material/Skeleton'
 
 
 const Messages = () => {
     const selectedUserId = useMessageUi(state => state.selectedChatId)
     const session = useSession()
-    const messages = useGetMessagesUser() 
+    const { data: messages = [], isLoading, error, isFetching, isPending, isSuccess, isError } = useGetMessagesUser()
+    console.log('текущие сообщения', messages)
      // соединение Ui и сообщений с бд. в единый поток.
   const messageUi = useMessageUi(state =>
   selectedUserId ? state.messages[selectedUserId] : undefined
@@ -62,11 +65,30 @@ const Messages = () => {
 }, [RefMessageId])
 
 
+const SkeletonLoaderMessage = <div className='message_content' style={{gap:'10px'}}>
+  <Skeleton className = 'message is-me' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message is-me' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message is-me' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message is-me' variant='rounded' width={700} height={60}/> 
+  <Skeleton className = 'message' variant='rounded' width={700} height={60}/> 
+
+
+
+</div>
+
+
+
+
 return (
         <>
         <div className="messages" >
-            <div className="messages__list">
-                 {renderMessages.map((msg, index) => {
+            <div className="messages__list"> 
+                {isLoading ? (<div>{SkeletonLoaderMessage}</div> )
+                :isError ? ( <div>Error {error.message}</div> ) 
+                : ( renderMessages.map((msg, index) => { // тут компонент загрузки
   const isUser = msg.senderId === session.data?.user.uid
 const currentTime = new Date(msg.createdAt) 
 // здесь приводим к Date для рендера
@@ -110,7 +132,7 @@ const showDateDivider = isNewDay(currentTime, prevTime)
     </div>
   
   )
-})}
+}))}
             <div  />
              {/* // для автоскролла к последнему сообщению */}
           </div>

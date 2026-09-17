@@ -8,6 +8,4 @@ export const ChatMetaSchema = z.object({
       membersInfo: z.record(z.string(), MemberInfoSchema),
       members: z.array(z.string()),
       updatedAt: z.instanceof(Timestamp),
-      _localtime: z.date()
-
     })
