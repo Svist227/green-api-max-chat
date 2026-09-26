@@ -1,4 +1,6 @@
 
+
+// техничесий долг
 // export {default} from 'next-auth/middleware'
   import { NextResponse } from 'next/server'
   import { NextRequest } from 'next/server'
@@ -7,39 +9,41 @@
 
   
   export async function middleware(req: NextRequest) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-    const isAuth = !!token
-    console.log('token in middleware', token); // <- убедись, что username есть
+  //   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  //   const isAuth = !!token
+  //   console.log('token in middleware', token); // <- убедись, что username есть
 
 
 
-    const pathname = req.nextUrl.pathname
-    const publicRoutes = ['/login', '/register','/set-username']
+  //   const pathname = req.nextUrl.pathname
+  //   const publicRoutes = ['/login', '/register','/set-username','/test']
 
-    // Не авторизован
-    if (!isAuth && !publicRoutes.includes(pathname)) {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
+  //   // Не авторизован
+  //   if (!isAuth && !publicRoutes.includes(pathname)) {
+  //     return NextResponse.redirect(new URL('/login', req.url))
+  //   }
 
-    // Авторизован но без username
-    if ( isAuth && !token?.username && pathname !== '/set-username') {
-       return NextResponse.redirect(new URL('/set-username', req.url))
-    }
+  //   // Авторизован но без username
+  //   if ( isAuth && !token?.username && pathname !== '/set-username') {
+  //      return NextResponse.redirect(new URL('/set-username', req.url))
+  //   }
 
-    console.log('token?.username', token?.username)
-    // авторизован и username есть, но пытается зайти на login
-  if (isAuth && token?.username && publicRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL('/', req.url))
-  }
+  //   console.log('token?.username', token?.username)
+  //   // авторизован и username есть, но пытается зайти на login
+  // if (isAuth && token?.username && publicRoutes.includes(pathname)) {
+  //   return NextResponse.redirect(new URL('/', req.url))
+  // }
 
 
-    return NextResponse.next();
+  //   return NextResponse.next();
+  // 
   }
   
   // See "Matching Paths" below to learn more
   export const config = {
    matcher:   '/((?!_next|api|.*\\..*).*)',
   }
+  
 
 
   //  matcher:   '/((?!_next|api|.*\\..*).*)',

@@ -1,7 +1,7 @@
-import { authConfig } from "@/services/auth";
+import { authConfig2 } from "@/services/telegram";
 import NextAuth from "next-auth";
 
-const handler = NextAuth(authConfig)
+const handler = NextAuth(authConfig2)
 
 
 

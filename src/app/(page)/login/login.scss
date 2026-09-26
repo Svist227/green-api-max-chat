@@ -162,6 +162,9 @@ img {
 				align-items: center;
 				justify-content: space-between;
 				margin-bottom: 1.25rem;
+				display: flex;
+				justify-content: center;
+			
 				
 			}
 
@@ -181,8 +184,11 @@ img {
 				text-transform: unset;
 				text-rendering: optimizeLegibility;
 			}
-
+			
 			.input-submit {
+				
+				display: flex;
+				justify-content: center;
 				font-family: inherit;
 				font-size: 1rem;
 				font-weight: 500;
@@ -199,6 +205,8 @@ img {
 				box-shadow: var(--shadow-medium);
 				text-transform: capitalize;
 				text-rendering: optimizeLegibility;
+
+				
 			}
 			.register{
 				font-family: inherit;
