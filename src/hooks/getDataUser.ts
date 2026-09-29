@@ -1,4 +1,5 @@
 'use client';
+import { usesChatStore } from '@/store/chat-selection.store'
 import type { Chat } from '@/types/chat'
 
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 async function getUsers(): Promise<Chat[]> {
     const res = await fetch('/api/chats', {
         credentials: 'same-origin',
+        headers: { 'x-instance-key': usesChatStore.getState().accountKey || '' },
         cache: 'no-store',
     });
     const data = await res.json();

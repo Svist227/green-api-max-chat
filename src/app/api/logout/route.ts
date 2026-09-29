@@ -1,4 +1,4 @@
-import { apiUrl } from "@/constants/url"
+import { greenApiUrl } from "@/constants/url"
 import { getToken } from "@/utils/getToken";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -11,9 +11,8 @@ export async function GET(request: NextRequest) {
             { status: 401 }
         );
     }
-    const {idInstance, apiTokenInstance} = tokens
 
-    const url = `${apiUrl}/waInstance${idInstance}/logout/${apiTokenInstance}`
+    const url = greenApiUrl(tokens, 'logout')
 
     const res = await fetch(url) // Response объект 
 

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { apiUrl } from '@/constants/url'
+import { greenApiUrl } from '@/constants/url'
 import { getToken } from '@/utils/getToken'
 import { GreenNotificationSchema, NotificationMessageSchema, ReceiptSchema } from '@/schemas/MessageSchema'
 
@@ -13,9 +13,8 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'Необходимо войти в аккаунт' }, { status: 401, headers })
         }
 
-        const { idInstance, apiTokenInstance } = tokens
         const res = await fetch(
-            `${apiUrl}/waInstance${encodeURIComponent(idInstance)}/receiveNotification/${encodeURIComponent(apiTokenInstance)}?receiveTimeout=5`,
+            `${greenApiUrl(tokens, 'receiveNotification')}?receiveTimeout=5`,
             { cache: 'no-store', signal: request.signal },
         )
         if (!res.ok) {
@@ -67,9 +66,8 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ message: 'Некорректный receiptId' }, { status: 400, headers })
         }
 
-        const { idInstance, apiTokenInstance } = tokens
         const res = await fetch(
-            `${apiUrl}/waInstance${encodeURIComponent(idInstance)}/deleteNotification/${encodeURIComponent(apiTokenInstance)}/${receipt.data.receiptId}`,
+            `${greenApiUrl(tokens, 'deleteNotification')}/${receipt.data.receiptId}`,
             { method: 'DELETE', cache: 'no-store', signal: request.signal },
         )
         if (!res.ok) {

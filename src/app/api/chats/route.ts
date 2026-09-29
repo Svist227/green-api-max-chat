@@ -1,8 +1,9 @@
 import type { Chat } from '@/types/chat'
 import { NextResponse, type NextRequest } from 'next/server';
-import { apiUrl } from '@/constants/url';
+import { greenApiUrl } from '@/constants/url';
 import { getToken } from '@/utils/getToken';
 import { z } from 'zod';
+import { ChatSchema } from '@/types/chat';
 
 const PhoneSearchSchema = z.object({
     phoneNumber: z.string().regex(/^[1-9]\d{7,14}$/)
@@ -11,12 +12,12 @@ const PhoneSearchSchema = z.object({
 
 const AccountSchema = z.object({
     exist: z.boolean(),
-    chatId: z.string(),
+    chatId: z.string().default(''),
 });
 
 const ContactSchema = z.object({
     chatId: z.string().min(1),
-    chatType: z.enum(['user', 'group', 'supergroup', 'channel']),
+    chatType: ChatSchema.shape.type,
     name: z.string(),
     contactName: z.string().optional(),
     username: z.string().nullish(),
@@ -36,10 +37,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: 'Введите полный номер телефона с кодом страны' }, { status: 400, headers });
         }
 
-        const { idInstance, apiTokenInstance } = tokens;
-        const baseUrl = `${apiUrl}/waInstance${encodeURIComponent(idInstance)}`;
-        const token = encodeURIComponent(apiTokenInstance);
-        const accountRes = await fetch(`${baseUrl}/checkAccount/${token}`, {
+        const accountRes = await fetch(greenApiUrl(tokens, 'checkAccount'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phoneNumber: Number(input.data.phoneNumber) }),
@@ -57,7 +55,7 @@ export async function POST(request: NextRequest) {
         if (accountData?.status === false) {
             const limited = accountData?.data?.reason === 'rate_limit_exceeded';
             return NextResponse.json(
-                { message: limited ? 'Telegram ограничил поиск по номерам. Повторите позже' : 'Проверка номера сейчас недоступна' },
+                { message: limited ? 'Мессенджер ограничил поиск по номерам. Повторите позже' : 'Проверка номера сейчас недоступна' },
                 { status: limited ? 429 : 502, headers },
             );
         }
@@ -67,7 +65,7 @@ export async function POST(request: NextRequest) {
         }
         if (!account.data.exist) return NextResponse.json(null, { headers });
 
-        const contactRes = await fetch(`${baseUrl}/getContactInfo/${token}`, {
+        const contactRes = await fetch(greenApiUrl(tokens, 'getContactInfo'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chatId: account.data.chatId }),
@@ -110,8 +108,8 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const { idInstance, apiTokenInstance } = tokens;
-        const url = `${apiUrl}/waInstance${encodeURIComponent(idInstance)}/getChats/${encodeURIComponent(apiTokenInstance)}`;
+        const contactsOnly = tokens.messenger === 'max' && request.nextUrl.searchParams.get('contacts') === 'true';
+        const url = greenApiUrl(tokens, contactsOnly ? 'getContacts' : 'getChats');
 
         try {
             const res = await fetch(url, { cache: 'no-store' });
@@ -125,22 +123,23 @@ export async function GET(request: NextRequest) {
 
             if (!res.ok) {
                 return NextResponse.json(
-                    { message: 'Не удалось загрузить чаты из GREEN API' },
+                    { message: contactsOnly ? 'Не удалось загрузить контакты MAX' : 'Не удалось загрузить чаты из GREEN API' },
                     { status: 502 },
                 );
             }
 
-            const chats = await res.json();
+            const chats = z.array(ChatSchema.extend({ contactName: z.string().nullish() })).safeParse(await res.json());
 
-            if (!Array.isArray(chats)) {
+            if (!chats.success) {
                 return NextResponse.json(
                     { message: 'Некорректный ответ GREEN API' },
                     { status: 502 },
                 );
             }
 
-            const chatsWithSelf = chats.map(chat => ({
+            const chatsWithSelf = chats.data.map(chat => ({
                 ...chat,
+                name: chat.contactName || chat.name,
                 isSelf: Boolean(tokens.ownChatId) && chat.chatId === tokens.ownChatId,
             }));
 

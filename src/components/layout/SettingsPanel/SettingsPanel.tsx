@@ -2,11 +2,13 @@ import { useState } from "react";
 
 import './SettingsPanel.scss'
 import {IconNotif,IconTheme,IconStorage,IconPrivacy,IconBlock,IconReport,IconLogout,IconChevron,IconClose} from './icons'
-import { signOut } from "next-auth/react";
+import { messengers } from "@/constants/url";
+import { signOut, useSession } from "next-auth/react";
 import { useSettingsPanelStore } from "@/store/chat-ui.store";
 import { usesChatStore } from "@/store/chat-selection.store";
 
 export default function SettingsPanel() {
+  const { data: session } = useSession()
   const open = useSettingsPanelStore(state => state.isOpen)
   const setOpen = useSettingsPanelStore(state => state.toggle)
   const [notif, setNotif] = useState(true);
@@ -17,7 +19,7 @@ export default function SettingsPanel() {
         
 
         try{
-          const res = await fetch('/api/logout')
+          const res = await fetch('/api/logout', { headers: { 'x-instance-key': usesChatStore.getState().accountKey || '' } })
 
           const status = await res.json()
 
@@ -142,7 +144,11 @@ export default function SettingsPanel() {
 
             {/* ACCOUNT */}
             <div className="section">
-              <div className="section-label">Аккаунт</div>
+              <div className="section-label">{session?.instance ? messengers[session.instance.messenger].label : 'Аккаунт'}</div>
+              <button type="button" className="menu-item" onClick={() => signOut({ callbackUrl: '/login' })}>
+                <div className="item-icon"><IconLogout /></div>
+                <span className="item-text">Сменить инстанс / Выйти</span>
+              </button>
 
               <div className="menu-item">
                 <div className="item-icon red"><IconLogout /></div>

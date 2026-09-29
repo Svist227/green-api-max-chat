@@ -1,10 +1,11 @@
-# Minix — Telegram Chat
+# Minix — MAX / Telegram Chat
 
-Веб-клиент Telegram на Next.js и GREEN API.
+Веб-клиент MAX и Telegram на Next.js и GREEN API.
 
 ## Возможности
 
-- Вход по ключам GREEN API и привязка Telegram через QR.
+- Выбор MAX / Telegram, вход по ключам GREEN API, QR и пароль 2FA.
+- Смена инстанса без отвязки мессенджера.
 - Чаты, «Избранное» и последние 50 сообщений с разделением по датам.
 - Отправка текста с Optimistic UI и получение новых сообщений без перезагрузки.
 - Просмотр полученных изображений с подписями.
@@ -17,7 +18,7 @@
 
 ## Локальный запуск
 
-Нужны Node.js ≥ 20.9, npm и Telegram-инстанс GREEN API.
+Нужны Node.js ≥ 20.9, npm и инстанс MAX или Telegram в GREEN API.
 
 ```bash
 # Клонировать репозиторий и установить зависимости
@@ -46,7 +47,7 @@ git status        # Посмотреть изменения
 git pull --ff-only # Получить обновления
 ```
 
-Откройте [localhost:3000/login](http://localhost:3000/login) и введите ключи инстанса. В GREEN API включите уведомления о входящих и исходящих сообщениях, включая отправленные через API; `webhookUrl` оставьте пустым.
+Откройте [localhost:3000/login](http://localhost:3000/login), выберите мессенджер и введите ключи инстанса. В GREEN API включите уведомления о входящих и исходящих сообщениях, включая отправленные через API; `webhookUrl` оставьте пустым.
 
 ## Структура проекта
 
@@ -73,11 +74,11 @@ public/             # Иконки интерфейса
 | --- | --- | --- |
 | GET / POST | `/api/auth/[...nextauth]` | Авторизация и сессия |
 | POST | `/api/test` | Проверка ключей для входа |
-| GET | `/api/qr` | QR-код и состояние привязки |
+| GET / POST | `/api/qr` | QR-код, состояние привязки и пароль 2FA |
 | GET | `/api/chats` | Список чатов |
 | POST | `/api/chats` | Поиск контакта по телефону |
 | GET | `/api/chats/[chatId]/messages` | Последние 50 сообщений |
 | POST | `/api/chats/[chatId]/messages` | Отправка текста |
 | GET | `/api/notifications` | Получение уведомления |
 | DELETE | `/api/notifications` | Подтверждение обработки уведомления |
-| GET | `/api/logout` | Отвязка Telegram-инстанса |
+| GET | `/api/logout` | Отвязка активного инстанса |

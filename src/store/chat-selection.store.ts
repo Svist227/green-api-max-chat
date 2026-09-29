@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware'
 
 interface ChatStates {
+  accountKey: string | null
   selectedUser: Chat | null
   setSelectedUser: (user: Chat) => void
 }
@@ -11,6 +12,7 @@ interface ChatStates {
 export const usesChatStore = create<ChatStates>()(
   persist<ChatStates>(
     (set) => ({
+      accountKey: null,
       selectedUser: null,
       setSelectedUser: (user) => set({ selectedUser: user }),
     }),

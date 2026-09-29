@@ -7,13 +7,13 @@ import { NotificationResponseSchema, RawMessageSchema, type RawMessage } from '@
 import { mergeMessages } from '@/hooks/useMergedMessages'
 import { useMessageUi } from '@/store/StateManagment'
 
-async function requestNotification(method: 'GET' | 'DELETE', signal: AbortSignal, receiptId?: number) {
+async function requestNotification(method: 'GET' | 'DELETE', signal: AbortSignal, accountKey: string, receiptId?: number) {
     const res = await fetch('/api/notifications', {
         method,
         signal,
         cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', 'x-instance-key': accountKey },
         ...(method === 'DELETE' && {
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiptId }),
         }),
     })
@@ -26,12 +26,13 @@ async function requestNotification(method: 'GET' | 'DELETE', signal: AbortSignal
 }
 
 export const useNotifications = () => {
-    const { status } = useSession()
+    const { status, data: session } = useSession()
+    const accountKey = session?.instance ? `${session.instance.messenger}:${session.instance.idInstance}` : ''
     const queryClient = useQueryClient()
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        if (status !== 'authenticated') return
+        if (status !== 'authenticated' || !accountKey) return
         if (!navigator.locks || typeof BroadcastChannel === 'undefined') {
             setError('Для получения уведомлений нужен браузер с поддержкой Web Locks и BroadcastChannel')
             return
@@ -39,7 +40,7 @@ export const useNotifications = () => {
 
         const controller = new AbortController()
         const { signal } = controller
-        const channel = new BroadcastChannel('green-notifications')
+        const channel = new BroadcastChannel(`green-notifications:${accountKey}`)
         const pause = (ms: number) => new Promise<void>(resolve => {
             const finish = () => {
                 clearTimeout(timer)
@@ -77,7 +78,7 @@ export const useNotifications = () => {
             let retryDelay = 1000
             while (!signal.aborted) {
                 try {
-                    const data = await requestNotification('GET', signal)
+                    const data = await requestNotification('GET', signal, accountKey)
                     if (signal.aborted) return
                     const notification = NotificationResponseSchema.nullable().safeParse(data)
                     if (!notification.success) throw new Error('Некорректный ответ уведомлений')
@@ -90,7 +91,7 @@ export const useNotifications = () => {
                             channel.postMessage(message)
                         }
                         // Подтверждаем только после обновления кеша или пропуска неподдерживаемого события.
-                        await requestNotification('DELETE', signal, receiptId)
+                        await requestNotification('DELETE', signal, accountKey, receiptId)
                     }
                     setError(null)
                     retryDelay = 1000
@@ -107,7 +108,7 @@ export const useNotifications = () => {
         }
 
         // Одна вкладка читает очередь, остальные получают сообщения через BroadcastChannel.
-        void navigator.locks.request('green-notifications', { signal }, receive).catch(() => {
+        void navigator.locks.request(`green-notifications:${accountKey}`, { signal }, receive).catch(() => {
             if (!signal.aborted) setError('Не удалось запустить получение уведомлений')
         })
 
@@ -115,7 +116,7 @@ export const useNotifications = () => {
             controller.abort()
             channel.close()
         }
-    }, [status, queryClient])
+    }, [status, queryClient, accountKey])
 
     return { error }
 }

@@ -2,12 +2,13 @@ import { useEffect } from 'react'
 import './SearchBar.scss'
 import { useRef } from 'react';
 import { useChatMode, useFocusStore } from '@/store/chat-ui.store';
-import { useValueSearch } from '@/store/chat-selection.store';
+import { usesChatStore, useValueSearch } from '@/store/chat-selection.store';
 
 const SearchBar = () => {
     const setMode = useChatMode(state => state.setMode)
     const mode = useChatMode(state => state.mode)
     const value = useValueSearch(state => state.currentValue)
+    const isMax = usesChatStore(state => state.accountKey?.startsWith('max:'))
     const setValue = useValueSearch(state => state.setValue)
     const inputRef = useRef<HTMLInputElement>(null);
     const {isOpen, toggle} = useFocusStore()
@@ -52,7 +53,7 @@ const SearchBar = () => {
             <div className="searchbar__input" >
             
             <input className='searchbar__input-inner' 
-            type="text" placeholder={mode === 'messages' ? 'Поиск в текущем чате' : 'Имя, @username или телефон'} onChange={handleChangeInput}
+            type="text" placeholder={mode === 'messages' ? 'Поиск в текущем чате' : isMax ? 'Имя или телефон' : 'Имя, @username или телефон'} onChange={handleChangeInput}
             value={value} onClick={handleClickValue} onKeyDown={handleBack} 
             ref={inputRef}
             />

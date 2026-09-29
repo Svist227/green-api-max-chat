@@ -13,12 +13,12 @@ export const SendMessageResponseSchema = z.object({
 
 type SendMessageInput = z.infer<typeof SendMessageSchema>
 
-export const SendMessages = async (input: SendMessageInput) => {
+export const SendMessages = async (input: SendMessageInput, accountKey: string) => {
     const data = SendMessageSchema.parse(input)
 
     const res = await fetch(`/api/chats/${encodeURIComponent(data.chatId)}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-instance-key': accountKey },
         body: JSON.stringify({ message: data.message }),
     })
 

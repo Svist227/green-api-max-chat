@@ -27,19 +27,20 @@ interface dataMode {
   errorLog?: string
   onSubmit?: React.FormEventHandler<HTMLFormElement>
   loading: boolean
-  qr?: string | undefined 
+  qr?: string | undefined
+  needsPassword?: boolean
 }
 
 
 const 
-Form = ({ mode, errorLog, onSubmit, loading, qr }:dataMode) => {
+Form = ({ mode, errorLog, onSubmit, loading, qr, needsPassword }:dataMode) => {
   const { label, question, link, labelButton ,href } = data[mode];
 
- 
-  
+
+
   return (
      <main className= 'main' >
-    
+
 	<div className="container">
 		<section className="wrapper">
       {loading && (    <CircularProgress  className = 'wrapper-loader' aria-label="Loading…" />
@@ -50,9 +51,16 @@ Form = ({ mode, errorLog, onSubmit, loading, qr }:dataMode) => {
 				</p>
 			</div>
 			<form name="signin" className="form" onSubmit={onSubmit} >
-		
+
          {mode === 'signin' && (
           <>
+          <div className="input-control input-control--stack">
+            <label htmlFor="messenger">Мессенджер</label>
+            <select id="messenger" name="messenger" className="input-field" defaultValue="max">
+              <option value="max">MAX</option>
+              <option value="telegram">Telegram</option>
+            </select>
+          </div>
           <div className="input-control">
 					<label htmlFor="idInstance" className="input-label" hidden>idInstance</label> 
           <input type="text" name="idInstance" id="idInstance" className="input-field" placeholder="idInstance" required/>
@@ -65,7 +73,14 @@ Form = ({ mode, errorLog, onSubmit, loading, qr }:dataMode) => {
          )}
          {mode === 'register' && (
           <>
-         {qr && (
+         {needsPassword && (
+           <div className="input-control input-control--stack">
+             <label htmlFor="password">Пароль двухфакторной аутентификации</label>
+             <input id="password" name="password" type="password" className="input-field"
+               autoComplete="current-password" required />
+           </div>
+         )}
+         {qr && !needsPassword && (
   <img height={'100px'} width={'100px'}
     src={`data:image/png;base64,${qr}`}
     alt="QR code"
@@ -81,7 +96,7 @@ Form = ({ mode, errorLog, onSubmit, loading, qr }:dataMode) => {
 					<div className='center'>
             <button type="submit" name="submit" className="input-submit" >
 
-            {labelButton}
+            {needsPassword ? 'Подтвердить пароль' : labelButton}
           </button>
           </div>
           <Backdrop
@@ -91,7 +106,7 @@ Form = ({ mode, errorLog, onSubmit, loading, qr }:dataMode) => {
 </Backdrop>
 				</div>
 			</form>
-		   
+
 		</section>
 	</div>
 </main>

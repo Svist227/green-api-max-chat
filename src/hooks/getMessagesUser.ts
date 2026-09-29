@@ -12,7 +12,8 @@ async function getMessagesHistoryUser(
     const res = await fetch(
         `/api/chats/${encodeURIComponent(chatId)}/messages`,
         {
-            signal
+            signal,
+            headers: { 'x-instance-key': usesChatStore.getState().accountKey || '' },
         }
     )
 

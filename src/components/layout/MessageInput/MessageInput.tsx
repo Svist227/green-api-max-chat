@@ -50,7 +50,7 @@ const MessageInput = () => {
         setIsSending(true)
 
         try {
-            const result = await SendMessages(payload.data)
+            const result = await SendMessages(payload.data, usesChatStore.getState().accountKey || '')
             confirmMessage(chatId, tempId, result.idMessage)
         } catch (error) {
             removeMessage(chatId, tempId)

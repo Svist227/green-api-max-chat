@@ -23,10 +23,10 @@ function normalizePhone(value: string) {
     return phone
 }
 
-async function findContact(phoneNumber: string): Promise<Chat | null> {
+async function findContact(phoneNumber: string, accountKey: string | null): Promise<Chat | null> {
     const res = await fetch('/api/chats', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-instance-key': accountKey || '' },
         body: JSON.stringify({ phoneNumber }),
     })
     const data = await res.json()
@@ -34,10 +34,22 @@ async function findContact(phoneNumber: string): Promise<Chat | null> {
     return data
 }
 
+async function getContacts(accountKey: string | null): Promise<Chat[]> {
+    const res = await fetch('/api/chats?contacts=true', {
+        headers: { 'x-instance-key': accountKey || '' },
+        cache: 'no-store',
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Не удалось загрузить контакты MAX')
+    return data
+}
+
 const ChatListContainer = ({ searchMode }: { searchMode: chatMode }) => {
     const toggleMenu = useChatsOpen(state => state.toggle)
     const value = useValueSearch(state => state.currentValue)
     const chatId = usesChatStore(state => state.selectedUser?.chatId)
+    const accountKey = usesChatStore(state => state.accountKey)
+    const isMax = accountKey?.startsWith('max:') === true
     const localMessages = useMessageUi(state => chatId ? state.messages[chatId] : undefined) || []
     const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useGetMessagesUser()
     const { data: users = [], isLoading, error } = useGetDataUser()
@@ -47,14 +59,36 @@ const ChatListContainer = ({ searchMode }: { searchMode: chatMode }) => {
     const isPhoneSearch = /^\+|^\d[\d\s()-]*$/.test(query)
     const phone = isPhoneSearch ? normalizePhone(query) : ''
     const searchText = query.replace(/^@/, '').toLowerCase()
+    const contacts = useQuery({
+        queryKey: ['contacts', accountKey],
+        queryFn: () => getContacts(accountKey),
+        enabled: isMax && searchMode === 'chats' && !!searchText && !isPhoneSearch,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    })
+    const searchUsers = [...users]
+    for (const contact of contacts.data || []) {
+        const index = searchUsers.findIndex(user => user.chatId === contact.chatId)
+        if (index === -1) searchUsers.push(contact)
+        else searchUsers[index] = {
+            ...searchUsers[index],
+            ...contact,
+            name: contact.name || searchUsers[index].name,
+            username: contact.username || searchUsers[index].username,
+            phoneNumber: contact.phoneNumber || searchUsers[index].phoneNumber,
+        }
+    }
     const matchesUsername = (user: Chat) => !!searchText &&
         !!user.username?.replace(/^@/, '').toLowerCase().includes(searchText)
 
     const userFilter = isPhoneSearch
-        ? users.filter(user => phone && String(user.phoneNumber) === phone)
+        ? searchUsers.filter(user => phone && String(user.phoneNumber) === phone)
         : [
-            ...users.filter(matchesUsername),
-            ...users.filter(user => searchText && !matchesUsername(user) &&
+            ...searchUsers.filter(matchesUsername),
+            ...searchUsers.filter(user => searchText && !matchesUsername(user) &&
                 (user.isSelf ? 'Избранное' : user.name).toLowerCase().includes(searchText)),
         ]
 
@@ -64,10 +98,10 @@ const ChatListContainer = ({ searchMode }: { searchMode: chatMode }) => {
         return () => clearTimeout(timer)
     }, [phone])
 
-    const needsLookup = searchMode === 'chats' && !!phone && userFilter.length === 0 && !isLoading && !error
+    const needsLookup = searchMode === 'chats' && !!phone && userFilter.length === 0
     const contact = useQuery({
-        queryKey: ['contact', phone],
-        queryFn: () => findContact(phone),
+        queryKey: ['contact', accountKey, phone],
+        queryFn: () => findContact(phone, accountKey),
         enabled: needsLookup && phone === debouncedPhone,
         staleTime: 10 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
@@ -82,11 +116,11 @@ const ChatListContainer = ({ searchMode }: { searchMode: chatMode }) => {
 
     let content
     if (searchMode === 'chats') {
-        if (isLoading) content = <p>Загрузка чатов…</p>
-        else if (error) content = <p role="alert">{error.message}</p>
-        else if (isPhoneSearch && !phone) content = <p>Введите полный номер с кодом страны, например +7 (999) 123-45-67</p>
+        if (isPhoneSearch && !phone) content = <p>Введите полный номер с кодом страны, например +7 (999) 123-45-67</p>
         else if (needsLookup && (phone !== debouncedPhone || contact.isPending)) content = <p>Поиск контакта…</p>
         else if (needsLookup && contact.error) content = <p role="alert">{contact.error.message}</p>
+        else if (!isPhoneSearch && !userFilter.length && (isLoading || contacts.isFetching)) content = <p>Поиск контактов…</p>
+        else if (!isPhoneSearch && !userFilter.length && (error || contacts.error)) content = <p role="alert">{(error || contacts.error)?.message}</p>
         else content = <ChatSearchResults data={userFilter.length ? userFilter : needsLookup && contact.data ? [contact.data] : []} />
     } else if (searchMode === 'messages') {
         if (!chatId) content = <p>Выберите чат для поиска сообщений</p>

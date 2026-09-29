@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { apiUrl } from '@/constants/url'
+import { greenApiUrl } from '@/constants/url'
 import { getToken } from '@/utils/getToken'
 import { SendMessageSchema, SendMessageResponseSchema } from '@/services/sendMessages'
 
@@ -26,9 +26,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                 { status: 400 },
             )
         }
-
-        const { idInstance, apiTokenInstance } = tokens
-        const url = `${apiUrl}/waInstance${encodeURIComponent(idInstance)}/sendMessage/${encodeURIComponent(apiTokenInstance)}`
+        const url = greenApiUrl(tokens, 'sendMessage')
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -79,11 +77,8 @@ export async function GET(
             )
         }
 
-        const { idInstance, apiTokenInstance } = tokens
-
         const url =
-            `${apiUrl}/waInstance${encodeURIComponent(idInstance)}` +
-            `/getChatHistory/${encodeURIComponent(apiTokenInstance)}`
+            greenApiUrl(tokens, 'getChatHistory')
 
         try {
             const res = await fetch(url, {
