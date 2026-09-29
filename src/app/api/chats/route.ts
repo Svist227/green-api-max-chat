@@ -1,3 +1,4 @@
+import type { Chat } from '@/types/chat'
 import { NextResponse, type NextRequest } from 'next/server';
 import { apiUrl } from '@/constants/url';
 import { getToken } from '@/utils/getToken';

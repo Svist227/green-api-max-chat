@@ -32,9 +32,8 @@ export default function Login(){
 const status = res.status
     if(status === 200){
             setLoading(false)
-            console.log('авторизован')
             // проверка на привязку.
-            let response = await fetch('/api/qr')
+            const response = await fetch('/api/qr')
             const result = await response.json() 
              if(result.result.type === 'already_registered'){
 
@@ -56,7 +55,6 @@ if (result?.ok) {
     if(status === 401){
     setLoading(false)
     setErrror('Вы еще не авторизованы')
-    console.log('Не авторизован')
 
     }
     if(status === 502){
@@ -65,7 +63,7 @@ if (result?.ok) {
          
     }
     }
-    catch(eror){
+    catch{
         setLoading(false)
 
         //  router.push('/странциа qr')

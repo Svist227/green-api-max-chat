@@ -17,7 +17,7 @@ export default function Register(){
 		setLoading(true)
 
 		try{
-		let response = await fetch('/api/qr',{
+		const response = await fetch('/api/qr',{
 			method: 'GET',
 			headers:{
 			'Content-Type': 'application/json;charset=utf-8'
@@ -28,7 +28,6 @@ export default function Register(){
         const status = response.status // ← ВОТ ТАК
 
         const {type} = result.result
-        console.log(result.status)
     if(type === 'already_registered'){
     setLoading(false)
     setErrror('Вы уже авторизованы, перенаправляю...')
@@ -42,8 +41,6 @@ if (result?.ok) {
     }
     else if(status === 200 && result.result?.type === 'qrCode'){
             setLoading(false)
-            console.log('авторизован')
-            console.log('статус', result)
             setQr(result.result.message)
 
 
@@ -54,7 +51,6 @@ if (result?.ok) {
     else if(status === 401){
     setLoading(false)
     setErrror('Вы еще не авторизованы')
-    console.log('Не авторизован')
 
     }
     else if(status === 502){
@@ -65,13 +61,10 @@ if (result?.ok) {
 
     else{
     setLoading(false)
-    console.log(result)
-    console.log('какая-то ошибка')
-    console.log('статус',status )
 
     }
     }
-    catch(eror){
+    catch{
         setLoading(false)
 
         //  router.push('/странциа qr')
@@ -91,13 +84,11 @@ useEffect(() => {
             const data = await response.json()
 
             if (!response.ok) {
-                console.log('Ошибка:', data)
                 return
             }
 
             const type = data.result?.type
 
-            console.log('worker:', type)
 
             if (type === 'already_registered') {
                 const result = await signIn('credentials', {
@@ -105,7 +96,6 @@ useEffect(() => {
 })
 
                 if (result?.ok) { 
-                 console.log('Начинаю сессию')
                 clearInterval(intervalId)
                 router.push('/')
                 return

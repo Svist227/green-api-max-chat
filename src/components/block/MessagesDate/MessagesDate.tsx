@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import './MessagesDate.scss'
 type MessagesDateProps = {
     date: string

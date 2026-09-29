@@ -38,7 +38,6 @@ providers: [
       })
       
         const result = await res.json();  
-        console.log('result', result)
         if(result.type === 'already_registered'){
           const accountResponse = await fetch(
             `${apiUrl}/waInstance${encodeURIComponent(idInstance)}/getAccountSettings/${encodeURIComponent(apiTokenInstance)}`,
@@ -49,7 +48,6 @@ providers: [
           const account = await accountResponse.json()
           if (typeof account?.chatId !== 'string' || !account.chatId.trim()) return null
 
-          console.log('начало сессии')
             return {
             id: idInstance,
             apiTokenInstance: apiTokenInstance,

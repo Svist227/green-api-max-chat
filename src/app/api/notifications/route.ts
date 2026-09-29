@@ -37,16 +37,16 @@ export async function GET(request: NextRequest) {
         const { receiptId, body } = notification.data
         const isMessage = ['incomingMessageReceived', 'outgoingMessageReceived', 'outgoingAPIMessageReceived'].includes(body.typeWebhook)
         const content = z.object({ typeMessage: z.string() }).safeParse(body.messageData)
-        const isText = content.success && ['textMessage', 'extendedTextMessage'].includes(content.data.typeMessage)
+        const isSupported = content.success && ['textMessage', 'extendedTextMessage', 'imageMessage'].includes(content.data.typeMessage)
 
-        // Остальные события подтверждаем без добавления в текстовую переписку.
-        if (!isMessage || (content.success && !isText)) {
+        // Остальные события подтверждаем без добавления в переписку.
+        if (!isMessage || (content.success && !isSupported)) {
             return NextResponse.json({ receiptId, message: null }, { headers })
         }
 
         const message = NotificationMessageSchema.safeParse(body)
         if (!message.success) {
-            return NextResponse.json({ message: 'Некорректные данные текстового сообщения' }, { status: 502, headers })
+            return NextResponse.json({ message: 'Некорректные данные сообщения' }, { status: 502, headers })
         }
 
         return NextResponse.json({ receiptId, message: message.data }, { headers })

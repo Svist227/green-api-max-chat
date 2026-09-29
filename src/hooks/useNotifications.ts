@@ -1,3 +1,4 @@
+import type { Chat } from '@/types/chat'
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useQueryClient } from '@tanstack/react-query'

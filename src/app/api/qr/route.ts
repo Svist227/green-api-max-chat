@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { parseGreenCookie } from "@/utils/parseTokens";
 const apiUrl = 'https://4100.api.green-api.com'
 
-export async function GET(request: Request) {
+export async function GET() {
     
     try
     {
@@ -24,10 +24,6 @@ export async function GET(request: Request) {
 
       })
 const text = await res.text();
-console.log('idInstance', idInstance)
-console.log('apiTokenInstance', apiTokenInstance)
-console.log("GREEN API status:", res.status);
-console.log("GREEN API body:", text);
 
 if (res.status === 401) {
   return NextResponse.json(
@@ -56,8 +52,7 @@ const result = JSON.parse(text);
         }
         
     }
-    catch(error){
-        console.log('error', error)
+    catch{
 
     return NextResponse.json(
     { message: "Ошибка обработки запроса" },

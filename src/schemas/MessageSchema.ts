@@ -23,6 +23,8 @@ export const RawMessageSchema = z.object({
     ]),
 
     textMessage: z.string().optional(),
+    downloadUrl: z.string().optional(),
+    caption: z.string().optional(),
 
     senderName: z.string().optional(),
 
@@ -71,6 +73,13 @@ export const NotificationMessageSchema = z.object({
             typeMessage: z.literal('extendedTextMessage'),
             extendedTextMessageData: z.object({ text: z.string() }),
         }),
+        z.object({
+            typeMessage: z.literal('imageMessage'),
+            fileMessageData: z.object({
+                downloadUrl: z.string(),
+                caption: z.string().optional(),
+            }),
+        }),
     ]),
 }).transform((body): RawMessage => ({
     type: body.typeWebhook === 'incomingMessageReceived' ? 'incoming' : 'outgoing',
@@ -82,7 +91,13 @@ export const NotificationMessageSchema = z.object({
     typeMessage: body.messageData.typeMessage,
     textMessage: body.messageData.typeMessage === 'textMessage'
         ? body.messageData.textMessageData.textMessage
-        : body.messageData.extendedTextMessageData.text,
+        : body.messageData.typeMessage === 'extendedTextMessage'
+            ? body.messageData.extendedTextMessageData.text
+            : body.messageData.fileMessageData.caption,
+    ...(body.messageData.typeMessage === 'imageMessage' && {
+        downloadUrl: body.messageData.fileMessageData.downloadUrl,
+        caption: body.messageData.fileMessageData.caption,
+    }),
 })).pipe(RawMessageSchema)
 
 export const NotificationResponseSchema = ReceiptSchema.extend({

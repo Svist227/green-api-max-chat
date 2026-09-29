@@ -1,6 +1,5 @@
 
 import './TopBar.scss'
-import formatRelativeDate from '@/utils/formatDate';
 
 import { useChatMode, useChatsOpen, useFocusStore, useSettingsPanelStore } from '@/store/chat-ui.store';
 import { usesChatStore } from '@/store/chat-selection.store';
@@ -17,7 +16,7 @@ const   TopBar = () => {
   
     
 
-    const handleClickSearch = (e:any) => {
+    const handleClickSearch = () => {
         setMode('messages')
         toggle()
         isOpenMenu()
@@ -25,13 +24,6 @@ const   TopBar = () => {
     }
 
 
-  //   const statusText = Boolean(print)
-  // ? 'печатает...'
-  // : status === 'online'
-  //   ? 'online'
-  //   : lastLogin
-  //     ? formatRelativeDate(lastLogin)
-  //     : 'offline';
 
 
 

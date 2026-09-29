@@ -10,7 +10,9 @@ export const mergeMessages = (
 
     // Серверная версия заменяет локальную с тем же идентификатором.
     for (const message of [...messageUi, ...messages]) {
-      if (!message.idMessage || !message.textMessage?.trim()) continue
+      const isImage = message.typeMessage === 'imageMessage'
+      const textMessage = isImage ? message.caption ?? message.textMessage : message.textMessage
+      if (!message.idMessage || (!isImage && !textMessage?.trim())) continue
 
       // GREEN API передаёт секунды, локальные сообщения могут содержать миллисекунды.
       const timestamp = message.timestamp < 1_000_000_000_000
@@ -19,7 +21,7 @@ export const mergeMessages = (
 
       if (!Number.isFinite(timestamp) || timestamp <= 0 || Number.isNaN(new Date(timestamp).getTime())) continue
 
-      map.set(`${message.chatId}:${message.idMessage}`, { ...message, timestamp })
+      map.set(`${message.chatId}:${message.idMessage}`, { ...message, textMessage, timestamp })
     }
 
     return Array.from(map.values()).sort(

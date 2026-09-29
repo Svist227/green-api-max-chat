@@ -1,4 +1,4 @@
-interface Chat {
+export interface Chat {
     chatId:string,
     isSelf?: boolean,
     name:string,

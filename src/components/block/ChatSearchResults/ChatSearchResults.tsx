@@ -1,3 +1,4 @@
+import type { Chat } from '@/types/chat'
 import './ChatSearchResults.scss'
 import ChatWindow from '@/components/block/ChatWindow/ChatWindow'
 import ZeroState from '@/components/block/ZeroState/ZeroState'

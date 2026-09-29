@@ -1,33 +1,21 @@
 'use client'
-import { useMessageIdStore, usesChatStore } from '@/store/chat-selection.store';
+import type { Chat } from '@/types/chat'
+import { usesChatStore } from '@/store/chat-selection.store';
 import './ChatWindow.scss'
-import { useMessageUi } from '@/store/StateManagment';
-import { useChatAvatar } from '@/hooks/useChatAvatar';
-import { useState } from 'react';
 
 
 
 interface ChatWindowProps {
   UserParams: Chat;
-  mode?: 'default' | 'search';
 }
-const ChatWindow = ({UserParams, mode = 'default'}: ChatWindowProps) => {
-    const { data: avatar } = useChatAvatar(UserParams.chatId)
-    console.log('avatar',avatar)
+const ChatWindow = ({UserParams}: ChatWindowProps) => {
     const name = UserParams.isSelf ? 'Избранное' : UserParams.name || UserParams.username || 'Без имени'
     const setSelectedUser = usesChatStore(state => state.setSelectedUser)
-    const setMessageId = useMessageIdStore(state => state.setValue) 
-    const setselectedUserId = useMessageUi(state => state.selectChat)
 
     const getId = () => {
-        if (mode === 'search') {
-            setMessageId(UserParams.chatId)
-            return;
-    }
       // добавление useroв в state/
          setSelectedUser(UserParams)
     
-    setselectedUserId(UserParams.chatId)
 
     
     }

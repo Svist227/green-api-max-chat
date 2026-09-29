@@ -6,7 +6,6 @@ import Content from '../components/layout/Content/Content'
 import SearchBar from '../components/layout/SearchBar/SearchBar'
 import TopBar from '../components/layout/TopBar/TopBar'
 import Messages from '../components/layout/Messages/Messages'
-import { ChatProvider } from '../store/ChatContext';
 import MessageInput from '../components/layout/MessageInput/MessageInput'
 import ChatListContainer from '../components/block/ChatListContainer/ChatListContainer'
 import SliderTabs from '../components/block/SliderTabs/SliderTabs'
@@ -26,15 +25,6 @@ const queryClient = new QueryClient({
   }
 })
 
-//перезапрос данных ко ключу если данные старые т.е. статус stale
-const invalidateMessage = () => {
-  queryClient.invalidateQueries({queryKey: ['mychats']})
-}
-
-const cancelRequest = () => {
-  queryClient.cancelQueries({queryKey: ['mychats']})
-}
-
 function Home() {   
   const mode = useChatMode(state => state.mode)
   const setMode = useChatMode(state => state.setMode)
@@ -46,7 +36,6 @@ function Home() {
   return (
     <QueryClientProvider client={queryClient}>  
            <ReactQueryDevtools initialIsOpen={false} />
-    <ChatProvider>
      <Content>
           <Sidebar >
             <SearchBar/>
@@ -64,7 +53,6 @@ function Home() {
             <SettingsPanel/>
           </Chat>
      </Content>
-    </ChatProvider>
       </QueryClientProvider>
 
    

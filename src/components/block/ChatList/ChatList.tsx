@@ -1,22 +1,16 @@
 import ChatWindow from '@/components/block/ChatWindow/ChatWindow'
 import './ChatList.scss'
-import { useSession } from 'next-auth/react';
 import { useGetDataUser } from '@/hooks/getDataUser';
-import { useGetDataUserMessage } from '@/hooks/getListMessagesUser';
 import Skeleton from '@mui/material/Skeleton';
 
     const ChatList = () => {
-        const session = useSession()
-        const CurrentUser = session.data?.user
         const { data: users = [], 
-        isLoading: isUsersLoading, 
         error: usersError,
         isPending: isUsersPending
      } = useGetDataUser()
 
 
 
-        console.log('users', users)
 
 const LoaderChats = <div className='loader' >   
     <Skeleton variant="circular" height={80}/>

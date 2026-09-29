@@ -1,5 +1,5 @@
+import type { Chat } from '@/types/chat'
 import { create } from 'zustand';
-import { MyUser } from '@/types/user';
 import { persist } from 'zustand/middleware'
 
 interface ChatStates {
@@ -36,21 +36,13 @@ export const useValueSearch = create<ValueSearch>((set) => ({
 
 
 
-// ДЖЕНЕРИК. (CurrentStore не используется в проекте)
+// Значение выбранного сообщения
 interface ValueStore<T>{
   value: T | null,
   setValue: (param:T) => void
 }
 
-// тут просто value объект User
-export const useCurrentUser = create<ValueStore<MyUser>>((set) => ({
-  value: null,
-  setValue: (user) => set({ value:user })
-
-}))
-
-
-// тут просто строка
+// ID сообщения для перехода из поиска
 export const useMessageIdStore = create<ValueStore<string>>(set => ({
   value: null,
   setValue: (idMessage) => set({value:idMessage})

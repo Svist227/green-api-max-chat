@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import './Form.scss'
-import classNames from 'classnames'
 import CircularProgress from '@mui/material/CircularProgress'
 import Backdrop from '@mui/material/Backdrop'
 
@@ -20,18 +19,11 @@ const data = {
     labelButton: 'Войти',
 
     href: '/register'
-},
-  setUsername: {
-    label: 'Ввдите ваш username',
-    question: '',
-    link: '',
-    labelButton: 'Сохранить',
-    href: ''
-  }
+}
 }
 
 interface dataMode {
-  mode: 'register' | 'signin' | 'setUsername',
+  mode: 'register' | 'signin',
   errorLog?: string
   onSubmit?: React.FormEventHandler<HTMLFormElement>
   loading: boolean
@@ -63,11 +55,11 @@ Form = ({ mode, errorLog, onSubmit, loading, qr }:dataMode) => {
           <>
           <div className="input-control">
 					<label htmlFor="idInstance" className="input-label" hidden>idInstance</label> 
-          <input type="text" name="idInstance" id="idInstance" className="input-field" placeholder="idInstance" required defaultValue='410022746026'/> 
+          <input type="text" name="idInstance" id="idInstance" className="input-field" placeholder="idInstance" required/>
 				</div>
           <div className="input-control">
 					<label htmlFor="apiTokenInstance" className="input-label" hidden>apiTokenInstance</label>
-            <input type="text" name="apiTokenInstance" id="apiTokenInstance" className="input-field" placeholder="apiTokenInstance" required defaultValue='99af1f72a5614b1dbfe07e9e69d86152a48cb80d4f4b4c6e9e'/> 
+            <input type="password" name="apiTokenInstance" id="apiTokenInstance" className="input-field" placeholder="apiTokenInstance" required/>
 				</div>
         </>
          )}

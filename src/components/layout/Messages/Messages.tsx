@@ -94,7 +94,7 @@ return (
                 {!selectedUserId ? <div>Выберите чат</div>
                 :isLoading ? (<div>{SkeletonLoaderMessage}</div> )
                 :isError && renderMessages.length === 0 ? ( <div>Ошибка: {error.message}</div> )
-                :renderMessages.length === 0 ? <div>Текстовых сообщений нет</div>
+                :renderMessages.length === 0 ? <div>Сообщений нет</div>
                 : ( renderMessages.map((msg, index) => { // тут компонент загрузки
   const isUser = selectedUser?.isSelf || msg.type === 'outgoing'
 const currentTime = new Date(msg.timestamp) 
@@ -135,6 +135,7 @@ const showDateDivider = isNewDay(currentTime, prevTime)
     <Message
       data={{
         text: msg.textMessage,
+        imageUrl: msg.typeMessage === 'imageMessage' ? msg.downloadUrl || '' : undefined,
         isUser,
         dataRU,
       }}

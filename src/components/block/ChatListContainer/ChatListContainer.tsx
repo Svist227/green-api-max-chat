@@ -1,3 +1,4 @@
+import type { Chat } from '@/types/chat'
 import './ChatListContainer.scss'
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
