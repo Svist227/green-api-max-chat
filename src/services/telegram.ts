@@ -40,9 +40,20 @@ providers: [
         const result = await res.json();  
         console.log('result', result)
         if(result.type === 'already_registered'){
+          const accountResponse = await fetch(
+            `${apiUrl}/waInstance${encodeURIComponent(idInstance)}/getAccountSettings/${encodeURIComponent(apiTokenInstance)}`,
+            { cache: 'no-store' },
+          )
+          if (!accountResponse.ok) return null
+
+          const account = await accountResponse.json()
+          if (typeof account?.chatId !== 'string' || !account.chatId.trim()) return null
+
+          console.log('начало сессии')
             return {
             id: idInstance,
             apiTokenInstance: apiTokenInstance,
+            ownChatId: account.chatId,
           }
         }
 
@@ -61,26 +72,14 @@ providers: [
       // Выполняется при первом успешном signIn
       if (user) {
         token.idInstance = user.id
-        token.apiTokenInstance =
-          (user as any).apiTokenInstance
+        if ('apiTokenInstance' in user) token.apiTokenInstance = user.apiTokenInstance
+        if ('ownChatId' in user) token.ownChatId = user.ownChatId
       }
 
       return token
     },
 
 
-    // async session({ session, token }) {
-
-    //   // idInstance можно отдать клиенту
-    //   if (session.user) {
-    //     ;(session.user as any).id =
-    //       token.idInstance
-    //   }
-
-    //   // apiTokenInstance сюда НЕ кладём
-
-    //   return session
-    // },
   },
 
 pages:{

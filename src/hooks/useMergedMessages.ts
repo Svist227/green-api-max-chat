@@ -1,43 +1,31 @@
-import { Message, RawMessage } from '@/types/message'
-import { mapFirestoreData } from '@/utils/mapFirestoreData'
+import type { RawMessage } from '@/types/message'
 import { useMemo } from 'react'
 
+export const mergeMessages = (
+  messages: RawMessage[],
+  messageUi: RawMessage[]
+): RawMessage[] => {
 
+    const map = new Map<string, RawMessage>()
 
-export const useMergedMessages = (messages: RawMessage[],messageUi: Message[]): Message[] => {
+    // Серверная версия заменяет локальную с тем же идентификатором.
+    for (const message of [...messageUi, ...messages]) {
+      if (!message.idMessage || !message.textMessage?.trim()) continue
 
-  // приведение времени сообщений под вывод
-  function convertTime(message:RawMessage):Message{
-    return {
-       ...message,
-      createdAt: message.createdAt.toDate().getTime()
-    }
-    
-  }
+      // GREEN API передаёт секунды, локальные сообщения могут содержать миллисекунды.
+      const timestamp = message.timestamp < 1_000_000_000_000
+        ? message.timestamp * 1000
+        : message.timestamp
 
+      if (!Number.isFinite(timestamp) || timestamp <= 0 || Number.isNaN(new Date(timestamp).getTime())) continue
 
-  const dbMessages = mapFirestoreData(messages, convertTime)
-
-
-
-  // Объединение данных с firestore и у моментальных локальных сообщений
-  const mergedMessages = useMemo(() => {
-    const map = new Map<string, Message>()
-
-    // optimistic
-    for (const m of messageUi) {
-      map.set(m.id, m)
-    }
-
-    // server (override)
-    for (const m of dbMessages) {
-      map.set(m.id, m)
+      map.set(`${message.chatId}:${message.idMessage}`, { ...message, timestamp })
     }
 
     return Array.from(map.values()).sort(
-      (a, b) => a.createdAt - b.createdAt
+      (a, b) => a.timestamp - b.timestamp || a.idMessage.localeCompare(b.idMessage, undefined, { numeric: true })
     )
-  }, [messageUi, dbMessages])
-
-  return mergedMessages
 }
+
+export const useMergedMessages = (messages: RawMessage[], messageUi: RawMessage[]): RawMessage[] =>
+  useMemo(() => mergeMessages(messages, messageUi), [messages, messageUi])

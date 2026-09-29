@@ -100,7 +100,7 @@ useEffect(() => {
             console.log('worker:', type)
 
             if (type === 'already_registered') {
-                const result = await signIn('green-api', {
+                const result = await signIn('credentials', {
                 redirect: false,
 })
 
@@ -122,7 +122,7 @@ useEffect(() => {
             console.error('Worker error:', error)
         }
 
-    }, 5000)
+    }, 3000)
 
     return () => {
         clearInterval(intervalId)

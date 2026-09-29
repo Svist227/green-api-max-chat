@@ -1,7 +1,7 @@
 import './Message.scss'
 import classNames from 'classnames'
 interface MessageData {
-    text: string,
+    text?: string,
     isUser:boolean,
      dataRU:string
 }

@@ -1,8 +1,9 @@
 interface Chat {
-    id:string,
-    photo:string,
-    username:string,
-    message: string;
-    data: string | null;
+    chatId:string,
+    isSelf?: boolean,
+    name:string,
+  type: 'user' | 'group' | 'supergroup' | 'channel'
+    phoneNumber: number | null;
+    username: string | null;
 //   colMessage: number;
 }

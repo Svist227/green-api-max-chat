@@ -34,7 +34,7 @@ const SliderTabs = ({ mode, setMode }: SliderTabsProps) => {
           }`}
           onClick={() => handleSliderClick(item)}
         >
-          <p style={{textAlign:'center'}}>{item}</p>
+            <p style={{textAlign:'center'}}>{item === 'chats' ? 'Чаты' : 'Сообщения'}</p>
         </button>
       ))}
     </div>

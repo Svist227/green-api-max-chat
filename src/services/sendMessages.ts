@@ -1,75 +1,38 @@
-import {firestore} from '@/lib/firebase'
-import {  serverTimestamp, doc,setDoc,getDoc,updateDoc } from "firebase/firestore"; // Добавлены collection, addDoc, serverTimestamp
-import { getChatId } from '@/utils/getChatId'
-import { MyUser } from '@/types/user';
+import { z } from 'zod'
 
-interface CurrentUserCustom {
-    uid:string,
-    name?:string | null,
-    email?:string | null,
-    image?:string | null
-}
-
-interface DataMessages{
-    id: string, 
-    value:string,
-    currentUser: CurrentUserCustom,
-    selectedUser:MyUser
-}
-
-export const SendMessages = async ({id,value,currentUser,selectedUser}:DataMessages) => {
-    const chatId = getChatId(currentUser.uid, String(selectedUser.uid)) // общий id
-
-
-      try {
-          const chatRef = doc(firestore, 'chats', chatId)
-          const chatSnap = await getDoc(chatRef)
-
-        // 1️⃣ создаём чат (если его нет)
-      if (!chatSnap.exists()) {
-      console.log('Создаю чат в бд')
-      console.log('Создается чат для user-ов.')
-      await setDoc(
-        doc(firestore, 'chats', chatId),
-        { 
-          uid: currentUser.uid,
-          members: [currentUser.uid, selectedUser.uid],
-          membersInfo: {
-            [currentUser.uid]:{
-              username: currentUser.name,
-              photoURL: currentUser.image
-            },
-            [selectedUser.uid]:{
-              username: selectedUser.username,
-              photoURL: selectedUser.photoURL
-            }
-          },
-          updatedAt: serverTimestamp(),
-          lastMessage: value, // передаем сообщение первое если нет чата
-        },
-        { merge: true }
-      )
-    }
-
-    await updateDoc(chatRef, {
-    lastMessage: value,
-    updatedAt: serverTimestamp(),
+export const SendMessageSchema = z.object({
+    chatId: z.string().trim().min(1, 'Не выбран чат'),
+    message: z.string()
+        .max(4096, 'Максимальная длина сообщения — 4096 символов')
+        .refine(text => text.trim().length > 0, 'Введите текст сообщения'),
 })
 
-const messageRef = doc(firestore, 'chats', chatId, 'messages', id)
-      // 2️⃣ отправляем сообщение
-      await setDoc(
-        messageRef,
-        {
-          id:id,
-          text: value,
-          senderId: currentUser.uid, // id отправителя
-          createdAt: serverTimestamp(),
-        }
-      )
+export const SendMessageResponseSchema = z.object({
+    idMessage: z.string().min(1),
+})
 
+type SendMessageInput = z.infer<typeof SendMessageSchema>
 
-    } catch (e) {
-      console.error('Ошибка отправки сообщения', e)
+export const SendMessages = async (input: SendMessageInput) => {
+    const data = SendMessageSchema.parse(input)
+
+    const res = await fetch(`/api/chats/${encodeURIComponent(data.chatId)}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: data.message }),
+    })
+
+    const result = await res.json()
+
+    if (!res.ok) {
+        const error = z.object({ message: z.string() }).safeParse(result)
+        throw new Error(error.success ? error.data.message : 'Не удалось отправить сообщение')
     }
+
+    const response = SendMessageResponseSchema.safeParse(result)
+    if (!response.success) {
+        throw new Error('Сервер не вернул идентификатор сообщения')
+    }
+
+    return response.data
 }

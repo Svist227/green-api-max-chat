@@ -1,29 +1,28 @@
-import { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react'
+import { useRef, useEffect } from 'react'
 import Message from '@/components/block/Message/Message'
 import './Messages.scss'
 import MessagesDate from '@/components/block/MessagesDate/MessagesDate'
-import getMessageDate from '@/utils/getMessageDate'
 import { isNewDay } from '@/utils/date'
-import { useSession } from 'next-auth/react'
 import { useMergedMessages } from '@/hooks/useMergedMessages'
 import { useGetMessagesUser } from '@/hooks/getMessagesUser'
 import { useMessageUi } from '@/store/StateManagment'
-import { useMessageIdStore } from '@/store/chat-selection.store'
+import { useMessageIdStore, usesChatStore } from '@/store/chat-selection.store'
 import Skeleton from '@mui/material/Skeleton'
+import { useNotifications } from '@/hooks/useNotifications'
 
 
 const Messages = () => {
-    const selectedUserId = useMessageUi(state => state.selectedChatId)
-    const session = useSession()
-    const { data: messages = [], isLoading, error, isFetching, isPending, isSuccess, isError } = useGetMessagesUser()
-    console.log('текущие сообщения', messages)
+    const { error: notificationError } = useNotifications()
+    const selectedUser = usesChatStore(state => state.selectedUser)
+    const selectedUserId = selectedUser?.chatId
+    const { data: messages = [], isLoading, error, isError } = useGetMessagesUser()
      // соединение Ui и сообщений с бд. в единый поток.
   const messageUi = useMessageUi(state =>
   selectedUserId ? state.messages[selectedUserId] : undefined
 ) ?? []  
-     const renderMessages = useMergedMessages(messages,messageUi)
 
-    
+
+    const renderMessages = useMergedMessages(messages,messageUi)
     const RefMessageId = useMessageIdStore(state => state.value) 
     const messageRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -57,12 +56,17 @@ const Messages = () => {
 
     element?.classList.add('highlight')
 
-  setTimeout(() => {
+  const timeoutId = setTimeout(() => {
   element?.classList.remove('highlight')
 }, 2000)
+
+  return () => {
+    clearTimeout(timeoutId)
+    element.classList.remove('highlight')
+  }
   }
 
-}, [RefMessageId])
+}, [RefMessageId, renderMessages])
 
 
 const SkeletonLoaderMessage = <div className='message_content' style={{gap:'10px'}}>
@@ -85,23 +89,30 @@ const SkeletonLoaderMessage = <div className='message_content' style={{gap:'10px
 return (
         <>
         <div className="messages" >
+            {notificationError && <p role="alert">{notificationError}</p>}
             <div className="messages__list"> 
-                {isLoading ? (<div>{SkeletonLoaderMessage}</div> )
-                :isError ? ( <div>Error {error.message}</div> ) 
+                {!selectedUserId ? <div>Выберите чат</div>
+                :isLoading ? (<div>{SkeletonLoaderMessage}</div> )
+                :isError && renderMessages.length === 0 ? ( <div>Ошибка: {error.message}</div> )
+                :renderMessages.length === 0 ? <div>Текстовых сообщений нет</div>
                 : ( renderMessages.map((msg, index) => { // тут компонент загрузки
-  const isUser = msg.senderId === session.data?.user.uid
-const currentTime = new Date(msg.createdAt) 
+  const isUser = selectedUser?.isSelf || msg.type === 'outgoing'
+const currentTime = new Date(msg.timestamp) 
 // здесь приводим к Date для рендера
 
 const prevMsg = renderMessages[index - 1];
 
-const prevTime = prevMsg ? new Date(prevMsg.createdAt) : null
+const prevTime = prevMsg ? new Date(prevMsg.timestamp) : null
 
 
-const dataData = getMessageDate(currentTime, prevTime)
+const dataData = currentTime.toLocaleDateString('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
 const showDateDivider = isNewDay(currentTime, prevTime)
 // время сообщения для компонента - сообщение   
-  const dataRU = currentTime.toLocaleTimeString([], {
+  const dataRU = currentTime.toLocaleTimeString('ru-RU', {
         hour: '2-digit',
         minute: '2-digit',
       })
@@ -109,9 +120,9 @@ const showDateDivider = isNewDay(currentTime, prevTime)
   return (
     
    
-   <div key={msg.id} className='message_container'  
+   <div key={`${msg.chatId}:${msg.idMessage}`} className='message_container'
    ref={(el) => {
-    messageRefs.current[msg.id] = el
+    messageRefs.current[msg.idMessage] = el
   }}
    >
    
@@ -123,7 +134,7 @@ const showDateDivider = isNewDay(currentTime, prevTime)
     <div className="message_content">
     <Message
       data={{
-        text: msg.text,
+        text: msg.textMessage,
         isUser,
         dataRU,
       }}

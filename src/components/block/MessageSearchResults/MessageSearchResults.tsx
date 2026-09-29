@@ -1,70 +1,46 @@
 import './MessageSearchResults.scss'
-import { Timestamp } from 'firebase/firestore'
-import ChatWindow from '@/components/block/ChatWindow/ChatWindow'
+import '@/components/block/ChatWindow/ChatWindow.scss'
 import ZeroState from '@/components/block/ZeroState/ZeroState'
-import { useSession } from 'next-auth/react'
-import { usesChatStore } from '@/store/chat-selection.store'
+import { useMessageIdStore, usesChatStore } from '@/store/chat-selection.store'
+import type { RawMessage } from '@/types/message'
 
-interface Message {
-    createdAt:Timestamp
-    id:string
-    senderId:string
-    text:string
-    
-}
-
-
-interface MessageData {
-    data:Message[]
-}
-
-
-const MessageSearchResults = ({data}:MessageData) => {
-    const sesion = useSession()
-    const currentUser = sesion.data?.user 
+const MessageSearchResults = ({ data }: { data: RawMessage[] }) => {
     const selectedUser = usesChatStore(state => state.selectedUser)
-  
-    
-    return (
-        <>
-        {data.length > 0 ? (
-            data.map((message, index) => {
-            if (!currentUser || !selectedUser) return null;
-           
-           const isMyMessage = currentUser?.uid === message.senderId;
+    const setMessageId = useMessageIdStore(state => state.setValue)
 
-  const userPhoto = isMyMessage
-    ? currentUser?.image
-    : selectedUser?.photoURL;
+    if (!selectedUser || data.length === 0) return <ZeroState />
 
-  const userName = isMyMessage
-    ? currentUser?.username
-    : selectedUser?.username;
-
-    const dataRU = message.createdAt.toDate().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+    return <>
+        {data.map(message => {
+            const name = selectedUser.isSelf ? 'Избранное' : message.type === 'outgoing'
+                ? 'Вы' : message.senderName || selectedUser.name || selectedUser.username || 'Без имени'
+            const timestamp = message.timestamp < 1_000_000_000_000 ? message.timestamp * 1000 : message.timestamp
+            const date = new Date(timestamp)
 
             return (
-                 <ChatWindow key={index}
-                UserParams={{
-                    id: message.id,
-                    photo:  userPhoto || '',
-                    username:userName || "Без имени",
-                    message: message.text,
-                    data: dataRU,
-
-                }}
-                mode = {'search'}
-                />
+                <button
+                    key={`${message.chatId}:${message.idMessage}`}
+                    type="button"
+                    className="chat-window"
+                    style={{ width: '100%', textAlign: 'left' }}
+                    onClick={() => setMessageId(message.idMessage)}
+                >
+                    <div className="chat-window__photo-container">
+                        <div className="user-avatar">{name.charAt(0)}</div>
+                    </div>
+                    <div className="chat-window__description">
+                        <div className="chat-window__description-top">
+                            <div className="chat-window__description-top-name">{name}</div>
+                            <time className="chat-window__description-top-time" dateTime={date.toISOString()}>
+                                {date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                            </time>
+                        </div>
+                        <div className="chat-window__description-down-message">{message.textMessage}</div>
+                    </div>
+                </button>
             )
-        })
-        ) : (
-            <ZeroState/>
-        )}
-        </>
-    )
+        })}
+    </>
 }
 
 export default MessageSearchResults

@@ -3,7 +3,6 @@ import { useState } from "react";
 import './SettingsPanel.scss'
 import {IconNotif,IconTheme,IconStorage,IconPrivacy,IconBlock,IconReport,IconLogout,IconChevron,IconClose} from './icons'
 import { signOut } from "next-auth/react";
-import { useUserStatus } from "@/hooks/useUserStatus";
 import { useSettingsPanelStore } from "@/store/chat-ui.store";
 import { usesChatStore } from "@/store/chat-selection.store";
 
@@ -13,11 +12,28 @@ export default function SettingsPanel() {
   const [notif, setNotif] = useState(true);
   const [theme, setTheme] = useState(false);
   const selectedUser = usesChatStore(state => state.selectedUser)
-    const {status, lastLogin} = useUserStatus()
   
   const handleClick = async () => {
-        signOut({callbackUrl:"/login"})
-        console.log('выход')
+        
+
+        try{
+          const res = await fetch('/api/logout')
+
+          const status = await res.json()
+
+          if(status.message === 'ok'){
+            signOut({callbackUrl:"/login"})
+             console.log('выход')
+
+          }
+          else{
+            console.log('Возникла ошибка. Попробуйте еще раз')
+          }
+        }
+        catch(error){
+          console.error(error)
+        }
+       
         
     }
   
@@ -48,10 +64,7 @@ export default function SettingsPanel() {
               <div className="user-name">{selectedUser?.username}</div>
               <div className="user-handle">{selectedUser?.username}</div>
             </div>
-            {status === 'online' && (
-                <div className="status-dot" /> 
-
-            )}
+            
           </div>
 
           <div className="panel-body">
@@ -131,10 +144,10 @@ export default function SettingsPanel() {
             <div className="section">
               <div className="section-label">Аккаунт</div>
 
-              <div className="menu-item" onClick={() => alert("Выход")}>
+              <div className="menu-item">
                 <div className="item-icon red"><IconLogout /></div>
                 <div className="item-text">
-                  <div className="item-label danger" onClick={handleClick}>Выйти</div>
+                  <div className="item-label danger" onClick={handleClick}>Отвязать устройство</div>
                 </div>
               </div>
             </div>

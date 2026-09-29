@@ -7,7 +7,4 @@ export type RawMessage  = z.infer<typeof RawMessageSchema>
 
 
 
-// Гениально
-export type Message =  Omit<RawMessage, "createdAt"> & {
-        createdAt: number
-    };
+

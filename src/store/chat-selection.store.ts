@@ -3,8 +3,8 @@ import { MyUser } from '@/types/user';
 import { persist } from 'zustand/middleware'
 
 interface ChatStates {
-  selectedUser: MyUser | null
-  setSelectedUser: (user: MyUser) => void
+  selectedUser: Chat | null
+  setSelectedUser: (user: Chat) => void
 }
 
 // Чат выбранный пользователем.
