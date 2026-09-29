@@ -18,7 +18,7 @@ const data = {
     link: 'Создать аккаунт',
     labelButton: 'Войти',
 
-    href: '/register'
+    href: 'https://console.green-api.com/instanceList'
 }
 }
 

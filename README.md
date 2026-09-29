@@ -1,37 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Minix — Telegram Chat
 
-## Getting Started
+Веб-клиент Telegram на Next.js и GREEN API.
 
-First, run the development server:
+## Возможности
+
+- Вход по ключам GREEN API и привязка Telegram через QR.
+- Чаты, «Избранное» и последние 50 сообщений с разделением по датам.
+- Отправка текста с Optimistic UI и получение новых сообщений без перезагрузки.
+- Просмотр полученных изображений с подписями.
+- Поиск чатов по имени и username, новых контактов — по телефону.
+- Поиск по загруженным сообщениям выбранного чата.
+
+## Стек
+
+**Next.js 16 · React 18 · TypeScript · NextAuth.js · TanStack Query · Zustand · Zod · SCSS · Material UI · GREEN API**
+
+## Локальный запуск
+
+Нужны Node.js ≥ 20.9, npm и Telegram-инстанс GREEN API.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Клонировать репозиторий и установить зависимости
+git clone https://github.com/Svist227/green-api-max-chat.git Chat
+cd Chat
+npm ci
+
+# Сгенерировать секрет для NEXTAUTH_SECRET
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Создайте `.env.local` в корне и вставьте сгенерированный секрет:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+NEXTAUTH_SECRET=ваш_сгенерированный_секрет
+NEXTAUTH_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev       # Запустить приложение
+npm run lint      # Проверить код
+npm run build     # Собрать приложение
+npm run start     # Запустить готовую сборку
 
-## Learn More
+git status        # Посмотреть изменения
+git pull --ff-only # Получить обновления
+```
 
-To learn more about Next.js, take a look at the following resources:
+Откройте [localhost:3000/login](http://localhost:3000/login) и введите ключи инстанса. В GREEN API включите уведомления о входящих и исходящих сообщениях, включая отправленные через API; `webhookUrl` оставьте пустым.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Структура проекта
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+src/
+├── app/            # Страницы, API-роуты, layout и общие стили
+├── assets/fonts/   # Локальные шрифты Manrope
+├── components/
+│   ├── block/      # Чаты, сообщения, результаты поиска
+│   └── layout/     # Панели, переписка и поле ввода
+├── constants/      # Адрес GREEN API
+├── hooks/          # Загрузка чатов, истории и уведомлений
+├── schemas/        # Zod-валидация сообщений
+├── services/       # Авторизация и отправка сообщений
+├── store/          # Состояние интерфейса и Optimistic UI
+├── types/          # Типы чатов и сообщений
+└── utils/          # Сессия, cookie и даты
+public/             # Иконки интерфейса
+```
 
-## Deploy on Vercel
+## Внутренний API
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# frontend
+| Метод | Роут | Назначение |
+| --- | --- | --- |
+| GET / POST | `/api/auth/[...nextauth]` | Авторизация и сессия |
+| POST | `/api/test` | Проверка ключей для входа |
+| GET | `/api/qr` | QR-код и состояние привязки |
+| GET | `/api/chats` | Список чатов |
+| POST | `/api/chats` | Поиск контакта по телефону |
+| GET | `/api/chats/[chatId]/messages` | Последние 50 сообщений |
+| POST | `/api/chats/[chatId]/messages` | Отправка текста |
+| GET | `/api/notifications` | Получение уведомления |
+| DELETE | `/api/notifications` | Подтверждение обработки уведомления |
+| GET | `/api/logout` | Отвязка Telegram-инстанса |
